@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>GymFlow Pro — Smart Gym & Revenue Ledger</title>
+  <title>GymFlow Pro — Multi-Gym SaaS & Revenue Ledger</title>
   <meta name="theme-color" content="#09090b" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -52,8 +52,91 @@
 </head>
 <body class="min-h-screen flex justify-center bg-zinc-950 text-zinc-100 select-none">
 
-  <!-- ==================== MAIN APP SHELL ==================== -->
-  <div id="mainAppShell" class="w-full max-w-[480px] min-h-screen bg-zinc-950 border-x border-zinc-900 flex flex-col relative shadow-2xl">
+  <!-- ==================== SCREEN 1: GYM OWNER LOGIN GATE ==================== -->
+  <div id="loginGateScreen" class="w-full max-w-[480px] min-h-screen bg-zinc-950 border-x border-zinc-900 flex flex-col justify-center px-5 py-8 shadow-2xl">
+    <div class="glass-card rounded-3xl p-6 space-y-5 border-emerald-500/25 shadow-2xl">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-zinc-950 font-extrabold shrink-0">
+          <i data-lucide="dumbbell" class="w-5 h-5 stroke-[2.5]"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <h1 class="text-lg font-extrabold text-white tracking-tight">GymFlow Pro</h1>
+            <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">PRO</span>
+          </div>
+          <p class="text-xs text-zinc-400">Gym Owner Login & Subscription Portal</p>
+        </div>
+      </div>
+
+      <div id="loginErrorBanner" class="hidden bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-semibold px-3.5 py-2.5 rounded-xl"></div>
+
+      <form onsubmit="handleGymLogin(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-zinc-300 mb-1">Gym Login ID *</label>
+          <input type="text" id="loginGymIdInput" required autocomplete="username" placeholder="e.g. fitfight" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-sm font-semibold text-white lowercase" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-zinc-300 mb-1">Password *</label>
+          <div class="relative">
+            <input type="password" id="loginPasswordInput" required autocomplete="current-password" placeholder="Enter gym password" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 pr-11 text-sm text-white" />
+            <button type="button" onclick="toggleLoginPassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white p-1">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="loginSubmitBtn" class="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] transition text-zinc-950 font-extrabold text-sm py-3.5 rounded-xl flex items-center justify-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4 stroke-[2.5]"></i>
+          <span>Login to Gym Dashboard</span>
+        </button>
+      </form>
+
+      <div class="bg-zinc-950/90 border border-zinc-800 rounded-2xl p-3 space-y-1.5 text-[11px] text-zinc-400">
+        <div class="font-bold text-zinc-300 flex items-center justify-between">
+          <span>Multi-Gym Subscription Access</span>
+          <span class="text-[10px] text-emerald-400 font-semibold">Auto-Verified</span>
+        </div>
+        <p class="leading-relaxed">Har gym ka apna alag Login ID, Password, aur isolated database hota hai. Subscription expire hone par app automatically lock ho jayega.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 2: SUBSCRIPTION EXPIRED / PAYMENT LOCK SCREEN ==================== -->
+  <div id="subscriptionLockScreen" class="hidden w-full max-w-[480px] min-h-screen bg-zinc-950 border-x border-zinc-900 flex flex-col justify-center px-5 py-8 shadow-2xl">
+    <div class="glass-card rounded-3xl p-6 space-y-5 border-rose-500/40 shadow-2xl text-center">
+      <div class="w-14 h-14 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-center mx-auto">
+        <i data-lucide="lock" class="w-7 h-7"></i>
+      </div>
+      <div class="space-y-1.5">
+        <span class="inline-block text-[10px] font-extrabold uppercase tracking-wider bg-rose-500/15 text-rose-400 px-2.5 py-1 rounded-full">Subscription Expired</span>
+        <h2 id="lockGymTitle" class="text-xl font-extrabold text-white">Gym Subscription Paused</h2>
+        <p id="lockGymMessage" class="text-xs text-zinc-400 leading-relaxed">Aapka monthly subscription plan expire ho chuka hai. App dobara chalu karne ke liye monthly subscription renew karein.</p>
+      </div>
+
+      <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-3.5 space-y-1.5 text-xs text-left">
+        <div class="flex justify-between"><span class="text-zinc-400">Gym ID:</span><span id="lockGymIdText" class="font-bold text-white">-</span></div>
+        <div class="flex justify-between"><span class="text-zinc-400">Valid Till Date:</span><span id="lockExpiryText" class="font-bold text-rose-400">-</span></div>
+        <div class="flex justify-between"><span class="text-zinc-400">Data Status:</span><span class="font-bold text-emerald-400">100% Safe & Preserved</span></div>
+      </div>
+
+      <div class="space-y-2.5">
+        <a id="renewSubscriptionWhatsAppBtn" href="#" target="_blank" class="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-xs py-3.5 rounded-xl flex items-center justify-center gap-2">
+          <i data-lucide="message-circle" class="w-4 h-4"></i>
+          <span>Pay & Renew Subscription on WhatsApp</span>
+        </a>
+        <button type="button" onclick="recheckSubscriptionStatus()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-sky-400 font-bold text-xs py-3 rounded-xl">
+          Payment Done? Refresh Status
+        </button>
+        <button type="button" onclick="logoutGym()" class="w-full text-zinc-500 hover:text-zinc-300 text-xs font-semibold py-1.5">
+          Switch Gym Account / Logout
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 3: MAIN APP SHELL ==================== -->
+  <div id="mainAppShell" class="hidden w-full max-w-[480px] min-h-screen bg-zinc-950 border-x border-zinc-900 flex flex-col relative shadow-2xl">
     
     <!-- Top Header -->
     <header class="sticky top-0 z-30 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-900 px-4 py-3 flex items-center justify-between">
@@ -64,11 +147,11 @@
         <div class="min-w-0">
           <div class="flex items-center gap-1.5">
             <span class="text-xs font-extrabold tracking-tight text-white">GymFlow Pro</span>
-            <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">CLOUD</span>
+            <span id="headerSubBadge" class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">ACTIVE</span>
           </div>
           <div class="flex items-center gap-1.5">
             <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-            <span id="syncStatusText" class="text-[10px] font-medium text-zinc-400 truncate">Cloud Sync Ready</span>
+            <span id="syncStatusText" class="text-[10px] font-medium text-zinc-400 truncate">Local Backup Active</span>
           </div>
         </div>
       </div>
@@ -93,8 +176,8 @@
           <img id="heroCoverImg" src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=900&q=80" alt="Gym Cover" class="w-full h-full object-cover" />
           <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/55 to-black/25"></div>
           <div class="absolute top-3 left-3 right-3 flex items-center justify-between">
-            <span class="inline-flex items-center gap-1.5 bg-zinc-950/80 backdrop-blur-md border border-emerald-500/30 text-emerald-400 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> LIVE AUTO-PILOT
+            <span id="heroPlanPill" class="inline-flex items-center gap-1.5 bg-zinc-950/80 backdrop-blur-md border border-emerald-500/30 text-emerald-400 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> PLAN ACTIVE
             </span>
             <button onclick="openCoverPhotoPicker()" class="w-8 h-8 rounded-full bg-zinc-950/80 hover:bg-emerald-500 hover:text-zinc-950 border border-white/15 text-white flex items-center justify-center transition">
               <i data-lucide="camera" class="w-3.5 h-3.5"></i>
@@ -229,90 +312,4 @@
 
             <div class="grid grid-cols-2 gap-2 pt-2 border-t border-zinc-800/80 text-[11px]">
               <div class="bg-zinc-900/80 rounded-xl px-2.5 py-1.5 flex items-center justify-between">
-                <span class="text-zinc-400">Gym Fees:</span>
-                <span id="ledgerGymTotal" class="font-bold text-emerald-400">₹0</span>
-              </div>
-              <div class="bg-zinc-900/80 rounded-xl px-2.5 py-1.5 flex items-center justify-between">
-                <span class="text-zinc-400">PT Fees:</span>
-                <span id="ledgerPtTotal" class="font-bold text-amber-400">₹0</span>
-              </div>
-              <div class="bg-zinc-900/80 rounded-xl px-2.5 py-1.5 flex items-center justify-between">
-                <span class="text-zinc-400">💵 Cash:</span>
-                <span id="ledgerCashTotal" class="font-bold text-white">₹0</span>
-              </div>
-              <div class="bg-zinc-900/80 rounded-xl px-2.5 py-1.5 flex items-center justify-between">
-                <span class="text-zinc-400">📱 UPI / Online:</span>
-                <span id="ledgerUpiTotal" class="font-bold text-sky-400">₹0</span>
-              </div>
-            </div>
-          </div>
-
-          <div id="yearlyMonthBreakdownBox" class="hidden space-y-2">
-            <div class="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">Month-Wise Summary</div>
-            <div id="yearlyMonthBreakdownList" class="grid grid-cols-2 gap-2"></div>
-          </div>
-
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">Detailed Payment Records</span>
-              <span id="ledgerRecordsBadge" class="text-[10px] text-zinc-500">Tap client to view personal statement</span>
-            </div>
-            <div id="ledgerEntriesList" class="space-y-2.5 max-h-[360px] overflow-y-auto"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ==================== TAB 3: SIMPLE & FAST + ENTRY ==================== -->
-      <section id="tab-add" class="hidden space-y-4">
-        <div class="glass-card rounded-2xl p-4 space-y-4">
-          <h2 class="text-base font-bold text-white border-b border-zinc-800 pb-3">New Client & Payment Entry</h2>
-          <form onsubmit="handleAddMember(event)" class="space-y-4">
-            
-            <div>
-              <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Client Full Name *</label>
-              <input type="text" id="inputName" required placeholder="e.g. Rohan Verma" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-sm text-white" />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-zinc-300 mb-1.5">WhatsApp Phone (10 Digits) *</label>
-              <div class="flex items-center bg-zinc-900 border border-zinc-800 focus-within:border-emerald-500 rounded-xl overflow-hidden">
-                <span class="px-3.5 py-3 bg-zinc-800 text-zinc-300 text-sm font-bold">+91</span>
-                <input type="tel" id="inputPhone" required maxlength="10" placeholder="9876543210" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" class="w-full bg-transparent px-3.5 py-3 text-sm text-white focus:outline-none" />
-              </div>
-            </div>
-
-            <div class="bg-zinc-950/70 border border-zinc-800/90 rounded-2xl p-3.5 space-y-2.5">
-              <div class="flex items-center justify-between">
-                <label class="text-xs font-bold text-white flex items-center gap-1.5">
-                  <span class="w-4 h-4 rounded-full bg-emerald-500 text-zinc-950 text-[10px] font-extrabold flex items-center justify-center">1</span>
-                  <span>Gym Membership Plan</span>
-                </label>
-                <span id="gymFeeBadge" class="text-xs font-extrabold text-emerald-400">₹1,000</span>
-              </div>
-              <div id="gymPlanButtons" class="grid grid-cols-3 gap-2"></div>
-              
-              <div id="customGymBox" class="hidden grid grid-cols-2 gap-2.5 pt-1.5 border-t border-zinc-800">
-                <div>
-                  <label class="block text-[10px] text-zinc-400 mb-1">Gym Months (e.g. 2)</label>
-                  <input type="number" id="customGymMonths" min="1" max="36" value="2" oninput="recalcEntryTotals()" class="w-full bg-zinc-900 border border-emerald-500/40 rounded-xl px-3 py-2 text-xs font-bold text-white" />
-                </div>
-                <div>
-                  <label class="block text-[10px] text-zinc-400 mb-1">Gym Fee (₹)</label>
-                  <input type="number" id="customGymFee" min="0" value="1800" oninput="recalcEntryTotals()" class="w-full bg-zinc-900 border border-emerald-500/40 rounded-xl px-3 py-2 text-xs font-bold text-emerald-400" />
-                </div>
-              </div>
-            </div>
-
-            <div class="bg-zinc-950/70 border border-zinc-800/90 rounded-2xl p-3.5 space-y-2.5">
-              <div class="flex items-center justify-between">
-                <label class="text-xs font-bold text-white flex items-center gap-1.5">
-                  <span class="w-4 h-4 rounded-full bg-amber-400 text-zinc-950 text-[10px] font-extrabold flex items-center justify-center">2</span>
-                  <span>Add Personal Training (PT)?</span>
-                </label>
-                <span id="ptFeeBadge" class="text-xs font-extrabold text-amber-400">+ ₹0</span>
-              </div>
-              <div id="ptPlanButtons" class="grid grid-cols-3 gap-2"></div>
-
-              <div id="customPtBox" class="hidden grid grid-cols-2 gap-2.5 pt-1.5 border-t border-zinc-800">
-                <div>
-                  <label class="block text-[10px] text-zinc-400 mb-1">PT Months (e.g. 1, 2)</label>
-                  <input type="number" id="customPtMonths" min="1" max="36" value="2" oninput="recalcEntryTotals()" class="w-full bg-zinc-900 border border-amber-500/40 rounded-xl px-3 py-2 text-xs 
+                <span class="text-zinc-400">
