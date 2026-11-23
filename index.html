@@ -121,13 +121,9 @@
       </div>
 
       <div class="space-y-2.5">
-        <button type="button" onclick="openSubscriptionPayModal()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-xs py-3.5 rounded-xl flex items-center justify-center gap-2">
-          <i data-lucide="qr-code" class="w-4 h-4 stroke-[2.5]"></i>
-          <span>Scan QR Code to Pay Subscription</span>
-        </button>
-        <a id="renewSubscriptionWhatsAppBtn" href="#" target="_blank" class="w-full bg-zinc-800 hover:bg-zinc-700 text-emerald-400 font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-2">
+        <a id="renewSubscriptionWhatsAppBtn" href="#" target="_blank" class="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-xs py-3.5 rounded-xl flex items-center justify-center gap-2">
           <i data-lucide="message-circle" class="w-4 h-4"></i>
-          <span>Send Payment Proof on WhatsApp</span>
+          <span>Pay & Renew Subscription on WhatsApp</span>
         </a>
         <button type="button" onclick="recheckSubscriptionStatus()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-sky-400 font-bold text-xs py-3 rounded-xl">
           Payment Done? Refresh Status
@@ -310,4 +306,10 @@
               </div>
               <div class="text-right">
                 <div class="text-[10px] text-zinc-400">Total Collection</div>
-                <div id="ledgerTotalAmount
+                <div id="ledgerTotalAmount" class="text-xl font-extrabold text-emerald-400">₹0</div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-zinc-800/80 text-[11px]">
+              <div class="bg-zinc-900/80 rounded-xl px-2.5 py-1.5 flex items-center justify-between">
+                <span class="text-zinc-400">
