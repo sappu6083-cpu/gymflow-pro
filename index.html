@@ -68,19 +68,19 @@
             <p class="text-[11px] text-zinc-400">Gym Owner Login & Subscription Portal</p>
           </div>
         </div>
-        <button type="button" onclick="openSubscriptionManagerModal()" title="Subscription & Credentials Manager" class="w-9 h-9 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-amber-400 flex items-center justify-center transition">
-          <i data-lucide="key-round" class="w-4 h-4"></i>
+        <button type="button" onclick="promptOperatorAccess()" title="Operator Master Control" class="px-2.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-amber-500/30 text-amber-400 flex items-center gap-1 text-[10px] font-extrabold transition">
+          <i data-lucide="shield" class="w-3.5 h-3.5"></i><span>Operator</span>
         </button>
       </div>
 
       <form onsubmit="handleOwnerLogin(event)" class="space-y-3.5">
         <div>
           <label class="block text-xs font-bold text-zinc-200 mb-1">Gym Login ID *</label>
-          <input type="text" id="loginUserInput" required value="owner" placeholder="enter gym id" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-sm text-white" />
+          <input type="text" id="loginUserInput" required placeholder="Operator dwara diya gaya ID" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-sm text-white" />
         </div>
         <div>
           <label class="block text-xs font-bold text-zinc-200 mb-1">Password *</label>
-          <input type="password" id="loginPassInput" required value="gym2026" placeholder="Enter gym password" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-sm text-white" />
+          <input type="password" id="loginPassInput" required placeholder="Operator dwara diya gaya Password" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-sm text-white" />
         </div>
         <p id="loginErrorText" class="text-xs text-rose-400 font-semibold hidden">Invalid Gym Login ID or Password.</p>
         <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] transition text-zinc-950 font-extrabold text-sm py-3.5 rounded-xl">
@@ -97,53 +97,129 @@
         </button>
       </div>
 
-      <button type="button" onclick="startFreeLiveDemo()" class="w-full bg-amber-400 hover:bg-amber-300 active:scale-[0.98] transition text-zinc-950 font-extrabold text-xs py-3 rounded-xl">
-        Try Free Live Demo (1-Tap Preview)
-      </button>
-
       <p class="text-[11px] text-zinc-400 text-center leading-relaxed">
-        Paid Gym ID & Password payment confirm hone ke baad activate kiya jayega.
+        Gym Owner ko Operator dwara diya gaya Login ID aur Password hi use karna hai.
       </p>
     </div>
   </div>
 
-  <!-- ==================== 2. MULTI-GYM SUBSCRIPTION & CREDENTIALS MANAGER ==================== -->
-  <div id="subManagerModal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-    <div class="w-full max-w-[430px] bg-zinc-900 border border-zinc-800 rounded-3xl p-5 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto my-auto">
+  <!-- ==================== 1B. GYM OWNER LOCKED / 1-MONTH UPI PAYMENT SCREEN ==================== -->
+  <div id="ownerLockedPaymentModal" class="fixed inset-0 z-50 hidden bg-zinc-950/95 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-[410px] glass-card rounded-3xl p-5 space-y-4 shadow-2xl border border-rose-500/30 my-auto">
       <div class="flex items-start justify-between gap-2 border-b border-zinc-800 pb-3">
         <div>
-          <h2 class="text-base font-extrabold text-white flex items-center gap-1.5">
-            <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
-            <span>Multi-Gym Subscription Manager</span>
-          </h2>
-          <p class="text-[11px] text-zinc-400">Create / Reset Gym Login ID, Password & UPI Monthly Validity</p>
+          <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-rose-500/15 text-rose-400">ACCOUNT LOCKED / EXPIRED</span>
+          <h2 id="lockedGymTitle" class="text-base font-extrabold text-white mt-1">1-Month Subscription Payment</h2>
+          <p id="lockedGymSubText" class="text-[11px] text-zinc-400">QR ya UPI par tap karke 1-month payment karein</p>
+        </div>
+        <button type="button" onclick="closeOwnerLockedPaymentModal()" class="w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center shrink-0">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-3.5 flex items-center justify-between">
+        <div>
+          <div class="text-[10px] text-zinc-400">Selected Plan (UPI Only)</div>
+          <div class="text-sm font-extrabold text-white">1 Month Plan</div>
+          <div id="lockedValidTillText" class="text-[10px] text-amber-400 font-semibold mt-0.5">Status: Locked</div>
+        </div>
+        <div class="text-right">
+          <div class="text-[10px] text-zinc-400">Payable Amount</div>
+          <div id="lockedPlanAmount" class="text-xl font-extrabold text-emerald-400">₹499</div>
+        </div>
+      </div>
+
+      <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex flex-col items-center space-y-3">
+        <button type="button" onclick="triggerDirectUpiPayment()" title="Tap QR to Pay via UPI" class="group relative rounded-2xl bg-white p-2 border-2 border-transparent hover:border-emerald-400 active:scale-95 transition">
+          <img id="ownerPayQrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi%3A%2F%2Fpay%3Fpa%3Daftabshaikh79921-1%40okicici%26pn%3DAftab%2520Shaikh%26am%3D499%26cu%3DINR" alt="Scan UPI QR" class="w-36 h-36 rounded-xl" />
+          <span class="mt-1.5 block text-[10px] font-extrabold text-zinc-900 bg-emerald-400/90 rounded-lg py-1">Tap QR to Pay</span>
+        </button>
+
+        <div class="w-full text-center space-y-1">
+          <div class="text-[10px] text-zinc-400 uppercase tracking-wider font-bold">Locked UPI ID</div>
+          <div class="flex items-center justify-between gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2">
+            <span class="text-xs font-mono font-bold text-emerald-400 select-all truncate">aftabshaikh79921-1@okicici</span>
+            <button type="button" onclick="copyFixedUpiId()" class="text-[10px] font-extrabold bg-emerald-500 text-zinc-950 hover:bg-emerald-400 px-2.5 py-1 rounded-lg shrink-0">Copy</button>
+          </div>
+        </div>
+
+        <button type="button" onclick="triggerDirectUpiPayment()" class="w-full bg-sky-500 hover:bg-sky-400 active:scale-[0.99] text-zinc-950 font-extrabold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5">
+          <i data-lucide="smartphone" class="w-3.5 h-3.5"></i><span>Pay 1 Month via UPI App</span>
+        </button>
+      </div>
+
+      <div class="space-y-2.5">
+        <div>
+          <label class="block text-[11px] font-semibold text-zinc-300 mb-1">Payment ke baad UPI UTR / Ref No. daalein</label>
+          <input type="text" id="ownerUtrSubmitInput" placeholder="e.g. 632849102411" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs text-white" />
+        </div>
+        <button type="button" onclick="submitOwnerPaymentRequest()" class="w-full bg-amber-400 hover:bg-amber-300 text-zinc-950 font-extrabold text-xs py-3 rounded-xl">
+          Payment Done — Operator ko Unlock Request Bhejein
+        </button>
+        <p id="ownerPendingMsg" class="text-[11px] text-emerald-400 font-semibold text-center hidden">
+          ✅ Payment request save ho gayi hai. Operator payment check karke turant unlock kar denge.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 1C. OPERATOR PIN PROMPT MODAL ==================== -->
+  <div id="operatorPinModal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-[360px] bg-zinc-900 border border-amber-500/30 rounded-3xl p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="shield-alert" class="w-5 h-5 text-amber-400"></i>
+          <h3 class="text-base font-extrabold text-white">Operator Master Lock</h3>
+        </div>
+        <button type="button" onclick="closeOperatorPinModal()" class="w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <p class="text-xs text-zinc-400">Sirf Operator hi ID/Password bana sakta hai aur Lock/Unlock kar sakta hai. Operator PIN daalein:</p>
+      <form onsubmit="verifyOperatorPin(event)" class="space-y-3">
+        <input type="password" id="operatorPinInput" required placeholder="Enter Operator PIN (Default: 9999)" class="w-full bg-zinc-950 border border-zinc-800 focus:border-amber-400 rounded-xl px-4 py-3 text-sm text-white text-center tracking-widest font-bold" />
+        <p id="operatorPinError" class="text-xs text-rose-400 font-semibold hidden">Galat Operator PIN.</p>
+        <button type="submit" class="w-full bg-amber-400 hover:bg-amber-300 text-zinc-950 font-extrabold text-sm py-3 rounded-xl">
+          Open Operator Control Panel
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== 2. OPERATOR MASTER CONTROL PANEL (LOCK / UNLOCK + ID / PASSWORD) ==================== -->
+  <div id="subManagerModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-[430px] bg-zinc-900 border border-amber-500/30 rounded-3xl p-5 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto my-auto">
+      <div class="flex items-start justify-between gap-2 border-b border-zinc-800 pb-3">
+        <div>
+          <span class="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-500/15 text-amber-400">OPERATOR ONLY PANEL</span>
+          <h2 class="text-base font-extrabold text-white mt-1">Lock/Unlock & Gym Owner IDs</h2>
+          <p class="text-[11px] text-zinc-400">Owner ko ID/Password dein aur payment aane par Unlock karein</p>
         </div>
         <button type="button" onclick="closeSubscriptionManagerModal()" class="w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center shrink-0">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <!-- Create / Update Gym Client Account -->
       <form onsubmit="saveGymAccountCredential(event)" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-3.5 space-y-3">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-extrabold text-white">+ Add / Update Gym Login ID & Password</span>
-          <span class="text-[10px] font-bold bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded">UPI Only</span>
+          <span class="text-xs font-extrabold text-white">+ Create / Edit Gym Owner ID & Password</span>
+          <span class="text-[10px] font-bold bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded">1-Month Billing</span>
         </div>
 
         <div class="grid grid-cols-2 gap-2.5">
           <div>
-            <label class="block text-[10px] font-bold text-zinc-300 mb-1">New Gym Login ID *</label>
+            <label class="block text-[10px] font-bold text-zinc-300 mb-1">Owner Login ID *</label>
             <input type="text" id="newGymLoginId" required placeholder="e.g. fitfight" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-bold text-white" />
           </div>
           <div>
-            <label class="block text-[10px] font-bold text-zinc-300 mb-1">New Password *</label>
+            <label class="block text-[10px] font-bold text-zinc-300 mb-1">Owner Password *</label>
             <input type="text" id="newGymLoginPass" required placeholder="e.g. gym@2026" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-bold text-emerald-400" />
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-2.5">
           <div>
-            <label class="block text-[10px] font-bold text-zinc-300 mb-1">Gym Display Name *</label>
+            <label class="block text-[10px] font-bold text-zinc-300 mb-1">Gym Name *</label>
             <input type="text" id="newGymDisplayName" required placeholder="e.g. Fit Or Fight Gym" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white" />
           </div>
           <div>
@@ -154,12 +230,13 @@
 
         <div class="grid grid-cols-2 gap-2.5">
           <div>
-            <label class="block text-[10px] font-bold text-zinc-300 mb-1">Plan Duration</label>
+            <label class="block text-[10px] font-bold text-zinc-300 mb-1">Subscription Months</label>
             <select id="newGymPlanMonths" onchange="recalcSubManagerPreview()" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-2.5 py-2 text-xs font-bold text-white">
-              <option value="1">1 Month (UPI)</option>
-              <option value="3">3 Months (UPI)</option>
-              <option value="6">6 Months (UPI)</option>
-              <option value="12">1 Year (UPI)</option>
+              <option value="1">1 Month</option>
+              <option value="2">2 Months</option>
+              <option value="3">3 Months</option>
+              <option value="6">6 Months</option>
+              <option value="12">12 Months</option>
             </select>
           </div>
           <div>
@@ -169,149 +246,62 @@
         </div>
 
         <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-xs py-3 rounded-xl transition">
-          Save New Login ID & Password
+          Save Gym Owner ID & Password
         </button>
       </form>
 
-      <!-- Fixed Locked UPI QR & UPI ID Section -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">Gym Owners (Lock / Unlock Control)</span>
+          <button type="button" onclick="operatorResetGymLedgerToZero()" class="text-[10px] font-bold bg-zinc-800 hover:bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded">
+            Reset Gym Data to 0
+          </button>
+        </div>
+        <div id="registeredGymAccountsList" class="space-y-2.5 max-h-52 overflow-y-auto"></div>
+      </div>
+
+      <!-- Tappable Fixed QR Code + Copyable Fixed UPI ID + Rate + Operator PIN -->
       <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-3.5 space-y-3">
         <div class="flex items-center justify-between">
           <span class="text-xs font-extrabold text-white flex items-center gap-1">
             <i data-lucide="lock" class="w-3.5 h-3.5 text-emerald-400"></i>
-            <span>Fixed Payment QR & UPI ID</span>
+            <span>Tap QR to Pay & Locked UPI ID</span>
           </span>
           <span id="mgrSubAmountText" class="text-xs font-extrabold text-emerald-400">₹499 / mo</span>
         </div>
 
         <div class="flex items-center gap-3">
-          <img id="mgrQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=upi%3A%2F%2Fpay%3Fpa%3Daftabshaikh79921-1%40okicici%26pn%3DAftab%2520Shaikh%26am%3D499%26cu%3DINR" alt="Fixed UPI QR" class="w-24 h-24 rounded-xl bg-white p-1.5 shrink-0" />
+          <button type="button" onclick="triggerDirectUpiPayment()" title="Tap QR to Pay" class="rounded-xl bg-white p-1.5 border-2 border-transparent hover:border-emerald-400 active:scale-95 transition shrink-0 text-center">
+            <img id="mgrQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=upi%3A%2F%2Fpay%3Fpa%3Daftabshaikh79921-1%40okicici%26pn%3DAftab%2520Shaikh%26am%3D499%26cu%3DINR" alt="Fixed UPI QR" class="w-20 h-20 rounded-lg" />
+            <span class="mt-1 block text-[9px] font-extrabold text-zinc-900 bg-emerald-400 rounded py-0.5">Tap QR</span>
+          </button>
           <div class="flex-1 space-y-2 min-w-0">
             <div>
-              <label class="block text-[10px] text-zinc-400 mb-0.5">Locked UPI ID (Read-Only)</label>
+              <label class="block text-[10px] text-zinc-400 mb-0.5">Fixed UPI ID (Locked)</label>
               <div class="flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 rounded-xl px-2.5 py-1.5">
-                <input type="text" id="mgrUpiIdInput" value="aftabshaikh79921-1@okicici" readonly class="w-full bg-transparent text-[11px] font-mono font-bold text-emerald-400 focus:outline-none truncate" />
-                <button type="button" onclick="copyFixedUpiId()" class="text-[10px] font-bold bg-zinc-800 hover:bg-zinc-700 text-white px-2 py-0.5 rounded shrink-0">Copy</button>
+                <input type="text" id="mgrUpiIdInput" value="aftabshaikh79921-1@okicici" readonly onclick="copyFixedUpiId()" class="w-full bg-transparent text-[10px] font-mono font-bold text-emerald-400 focus:outline-none select-all truncate cursor-pointer" />
+                <button type="button" onclick="copyFixedUpiId()" class="text-[10px] font-extrabold bg-emerald-500 text-zinc-950 hover:bg-emerald-400 px-2 py-0.5 rounded shrink-0">Copy</button>
               </div>
             </div>
-            <div>
-              <label class="block text-[10px] text-zinc-400 mb-0.5">Monthly UPI Fee (₹)</label>
-              <input type="number" id="mgrUpiAmountInput" oninput="refreshMgrQrPreview()" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-2.5 py-1.5 text-xs font-bold text-white" />
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-0.5">1-Month Fee (₹)</label>
+                <input type="number" id="mgrUpiAmountInput" oninput="refreshMgrQrPreview()" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-2 py-1 text-xs font-bold text-white" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-amber-400 mb-0.5">Operator PIN</label>
+                <input type="text" id="mgrOperatorPinInput" class="w-full bg-zinc-900 border border-amber-500/40 rounded-xl px-2 py-1 text-xs font-bold text-amber-400" />
+              </div>
             </div>
           </div>
         </div>
 
         <button type="button" onclick="saveMgrUpiSettings()" class="w-full bg-zinc-800 hover:bg-sky-500 hover:text-zinc-950 text-sky-400 font-bold text-xs py-2.5 rounded-xl transition">
-          Save Monthly Rate
+          Save Rate & Operator PIN
         </button>
-      </div>
-
-      <!-- Registered Gym Accounts List -->
-      <div class="space-y-2">
-        <div class="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">Registered Gym Accounts</div>
-        <div id="registeredGymAccountsList" class="space-y-2 max-h-40 overflow-y-auto"></div>
       </div>
     </div>
   </div>
 
   <!-- ==================== 3. MAIN GYM APP SHELL ==================== -->
-  <div id="mainAppShell" class="w-full max-w-[480px] min-h-screen bg-zinc-950 border-x border-zinc-900 flex flex-col relative shadow-2xl hidden">
-    
-    <header class="sticky top-0 z-30 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-900 px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-2.5 min-w-0">
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-zinc-950 font-extrabold shrink-0">
-          <i data-lucide="dumbbell" class="w-4 h-4 stroke-[2.5]"></i>
-        </div>
-        <div class="min-w-0">
-          <div class="flex items-center gap-1.5">
-            <span class="text-xs font-extrabold tracking-tight text-white">GymFlow Pro</span>
-            <span id="sessionModeBadge" class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">OWNER</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span id="activeOwnerSessionText" class="text-[10px] font-medium text-zinc-400 truncate">ID: -</span>
-          </div>
-        </div>
-      </div>
-      <div class="flex items-center gap-1.5 shrink-0">
-        <button type="button" onclick="openSubscriptionManagerModal()" title="Manage ID & Password" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-amber-400 p-2 rounded-xl active:scale-95 transition">
-          <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
-        </button>
-        <button type="button" onclick="lockOwnerApp()" title="Logout / Lock" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white p-2 rounded-xl active:scale-95 transition">
-          <i data-lucide="lock" class="w-3.5 h-3.5"></i>
-        </button>
-        <button type="button" onclick="switchTab('add')" class="bg-emerald-500 hover:bg-emerald-400 active:scale-95 transition text-zinc-950 font-bold text-xs px-3 py-2 rounded-xl flex items-center gap-1">
-          <i data-lucide="user-plus" class="w-3.5 h-3.5 stroke-[2.5]"></i>
-          <span>+ Entry</span>
-        </button>
-      </div>
-    </header>
-
-    <div id="toastContainer" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[440px] pointer-events-none flex flex-col gap-2"></div>
-
-    <main class="flex-1 overflow-y-auto px-4 pt-3.5 pb-28 space-y-5">
-      
-      <!-- ==================== TAB 1: DASHBOARD ==================== -->
-      <section id="tab-dashboard" class="space-y-5">
-        <div class="relative w-full h-40 rounded-3xl overflow-hidden border border-zinc-800 shadow-xl group">
-          <img id="heroCoverImg" src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=900&q=80" alt="Gym Cover" class="w-full h-full object-cover" />
-          <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/55 to-black/25"></div>
-          <div class="absolute top-3 left-3 right-3 flex items-center justify-between">
-            <span class="inline-flex items-center gap-1.5 bg-zinc-950/80 backdrop-blur-md border border-emerald-500/30 text-emerald-400 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> LIVE AUTO-PILOT
-            </span>
-            <button type="button" onclick="openCoverPhotoPicker()" class="w-8 h-8 rounded-full bg-zinc-950/80 hover:bg-emerald-500 hover:text-zinc-950 border border-white/15 text-white flex items-center justify-center transition">
-              <i data-lucide="camera" class="w-3.5 h-3.5"></i>
-            </button>
-          </div>
-          <div class="absolute bottom-3 left-4 right-4">
-            <h1 id="heroGymName" class="text-lg font-extrabold text-white truncate">Fit Or Fight Fitness Hub</h1>
-            <div class="flex items-center gap-1.5 text-xs text-zinc-300 mt-0.5">
-              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
-              <span id="heroGymLocation" class="truncate font-medium">Rander, Surat</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div onclick="openFilteredMembers('active')" class="glass-card rounded-2xl p-3.5 cursor-pointer hover:border-emerald-500/40 active:scale-[0.98] transition">
-            <div class="flex items-center justify-between text-zinc-400 mb-1">
-              <span class="text-xs font-medium">Active Members</span>
-              <i data-lucide="users" class="w-4 h-4 text-emerald-400"></i>
-            </div>
-            <div id="statActive" class="text-2xl font-extrabold text-white">0</div>
-            <div class="text-[10px] text-emerald-400 mt-1 flex items-center gap-1 font-semibold">
-              <span>Tap for details</span><i data-lucide="chevron-right" class="w-3 h-3"></i>
-            </div>
-          </div>
-
-          <div onclick="switchTab('ledger')" class="glass-card rounded-2xl p-3.5 cursor-pointer hover:border-sky-500/40 active:scale-[0.98] transition border-sky-500/20">
-            <div class="flex items-center justify-between text-zinc-400 mb-1">
-              <span class="text-xs font-medium">Today's Revenue</span>
-              <i data-lucide="indian-rupee" class="w-4 h-4 text-sky-400"></i>
-            </div>
-            <div id="statTodayCash" class="text-2xl font-extrabold text-sky-400">₹0</div>
-            <div id="statTodayCount" class="text-[10px] text-zinc-300 mt-1 font-semibold">0 payments today</div>
-          </div>
-
-          <div onclick="openFilteredMembers('expiring')" class="glass-card rounded-2xl p-3.5 cursor-pointer hover:border-amber-500/40 active:scale-[0.98] transition">
-            <div class="flex items-center justify-between text-zinc-400 mb-1">
-              <span class="text-xs font-medium">Expiring Soon</span>
-              <i data-lucide="clock" class="w-4 h-4 text-amber-400"></i>
-            </div>
-            <div id="statExpiring" class="text-2xl font-extrabold text-amber-400">0</div>
-            <div class="text-[10px] text-amber-400/80 mt-1 font-semibold">0–3 days left</div>
-          </div>
-
-          <div onclick="openFilteredMembers('expired')" class="glass-card rounded-2xl p-3.5 cursor-pointer hover:border-rose-500/40 active:scale-[0.98] transition">
-            <div class="flex items-center justify-between text-zinc-400 mb-1">
-              <span class="text-xs font-medium">Expired</span>
-              <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400"></i>
-            </div>
-            <div id="statExpired" class="text-2xl font-extrabold text-rose-400">0</div>
-            <div class="text-[10px] text-rose-400/80 mt-1 font-semibold">Pending renewal</div>
-          </div>
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="text-sm font-bold text-white flex items-center gap-1.5">
-    
+  <div id="mainAppShell" class="w-full max-
