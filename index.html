@@ -76,11 +76,11 @@
       <form onsubmit="handleOwnerLogin(event)" class="space-y-3.5">
         <div>
           <label class="block text-xs font-bold text-zinc-200 mb-1">Gym Login ID *</label>
-          <input type="text" id="loginUserInput" required placeholder="Operator dwara diya gaya ID" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-sm text-white" />
+          <input type="text" id="loginUserInput" required value="owner" placeholder="Operator dwara diya gaya ID" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-sm text-white" />
         </div>
         <div>
           <label class="block text-xs font-bold text-zinc-200 mb-1">Password *</label>
-          <input type="password" id="loginPassInput" required placeholder="Operator dwara diya gaya Password" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-sm text-white" />
+          <input type="password" id="loginPassInput" required value="gym2026" placeholder="Operator dwara diya gaya Password" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-sm text-white" />
         </div>
         <p id="loginErrorText" class="text-xs text-rose-400 font-semibold hidden">Invalid Gym Login ID or Password.</p>
         <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] transition text-zinc-950 font-extrabold text-sm py-3.5 rounded-xl">
@@ -97,9 +97,12 @@
         </button>
       </div>
 
-      <p class="text-[11px] text-zinc-400 text-center leading-relaxed">
-        Gym Owner ko Operator dwara diya gaya Login ID aur Password hi use karna hai.
-      </p>
+      <div class="flex items-center justify-between pt-1">
+        <span class="text-[10px] text-zinc-500">ID: owner • Pass: gym2026</span>
+        <button type="button" onclick="resetOwnerCredentialsDefault()" class="text-[10px] font-bold text-amber-400 hover:underline">
+          Reset ID & Password
+        </button>
+      </div>
     </div>
   </div>
 
@@ -297,11 +300,4 @@
         </div>
 
         <button type="button" onclick="saveMgrUpiSettings()" class="w-full bg-zinc-800 hover:bg-sky-500 hover:text-zinc-950 text-sky-400 font-bold text-xs py-2.5 rounded-xl transition">
-          Save Rate & Operator PIN
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== 3. MAIN GYM APP SHELL ==================== -->
-  <div id="mainAppShell" class="w-full max-
+          
