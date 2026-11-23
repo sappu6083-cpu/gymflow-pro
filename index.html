@@ -173,19 +173,25 @@
         </button>
       </form>
 
-      <!-- UPI QR & UPI ID Section -->
+      <!-- Fixed Locked UPI QR & UPI ID Section -->
       <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-3.5 space-y-3">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-extrabold text-white">Owner UPI QR & UPI ID (UPI Only)</span>
+          <span class="text-xs font-extrabold text-white flex items-center gap-1">
+            <i data-lucide="lock" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>Fixed Payment QR & UPI ID</span>
+          </span>
           <span id="mgrSubAmountText" class="text-xs font-extrabold text-emerald-400">₹499 / mo</span>
         </div>
 
         <div class="flex items-center gap-3">
-          <img id="mgrQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=upi%3A%2F%2Fpay%3Fpa%3Dgymlflow.owner%40upi%26pn%3DGymFlow%2520Pro%26am%3D499%26cu%3DINR" alt="UPI QR" class="w-24 h-24 rounded-xl bg-white p-1.5 shrink-0" />
+          <img id="mgrQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=upi%3A%2F%2Fpay%3Fpa%3Daftabshaikh79921-1%40okicici%26pn%3DAftab%2520Shaikh%26am%3D499%26cu%3DINR" alt="Fixed UPI QR" class="w-24 h-24 rounded-xl bg-white p-1.5 shrink-0" />
           <div class="flex-1 space-y-2 min-w-0">
             <div>
-              <label class="block text-[10px] text-zinc-400 mb-0.5">UPI ID</label>
-              <input type="text" id="mgrUpiIdInput" oninput="refreshMgrQrPreview()" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-2.5 py-1.5 text-xs font-mono text-emerald-400" />
+              <label class="block text-[10px] text-zinc-400 mb-0.5">Locked UPI ID (Read-Only)</label>
+              <div class="flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 rounded-xl px-2.5 py-1.5">
+                <input type="text" id="mgrUpiIdInput" value="aftabshaikh79921-1@okicici" readonly class="w-full bg-transparent text-[11px] font-mono font-bold text-emerald-400 focus:outline-none truncate" />
+                <button type="button" onclick="copyFixedUpiId()" class="text-[10px] font-bold bg-zinc-800 hover:bg-zinc-700 text-white px-2 py-0.5 rounded shrink-0">Copy</button>
+              </div>
             </div>
             <div>
               <label class="block text-[10px] text-zinc-400 mb-0.5">Monthly UPI Fee (₹)</label>
@@ -195,7 +201,7 @@
         </div>
 
         <button type="button" onclick="saveMgrUpiSettings()" class="w-full bg-zinc-800 hover:bg-sky-500 hover:text-zinc-950 text-sky-400 font-bold text-xs py-2.5 rounded-xl transition">
-          Save UPI QR & Rate
+          Save Monthly Rate
         </button>
       </div>
 
@@ -308,14 +314,4 @@
         <div>
           <div class="flex items-center justify-between mb-3">
             <h2 class="text-sm font-bold text-white flex items-center gap-1.5">
-              <i data-lucide="flame" class="w-4 h-4 text-amber-400"></i>
-              <span>Urgent Renewals</span>
-            </h2>
-            <button type="button" onclick="openFilteredMembers('all')" class="text-xs text-emerald-400 font-semibold">View All</button>
-          </div>
-          <div id="urgentList" class="space-y-3"></div>
-        </div>
-      </section>
-
-      <!-- ==================== TAB 2: REVENUE & PAYMENT HISTORY ==================== -->
-      <section id="tab-ledger" class="h
+    
