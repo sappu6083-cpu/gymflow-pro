@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GymFlow Pro — Operator Control Panel</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #131a2a;
+      --border: #232d45;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --primary: #3b82f6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--text); padding: 16px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    header {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+      gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 20px;
+    }
+    h1 { margin: 0; font-size: 1.35rem; }
+    .badge { font-size: 0.78rem; padding: 4px 10px; border-radius: 999px; background: #1e293b; color: var(--muted); }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px; margin-bottom: 18px;
+    }
+    .card h2 { margin: 0 0 12px; font-size: 1.05rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+    input, select, button {
+      width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+      background: #0f1624; color: var(--text); font-size: 0.92rem;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--primary); }
+    button { cursor: pointer; font-weight: 600; border: none; transition: opacity 0.15s; }
+    button:hover { opacity: 0.9; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-success { background: var(--success); color: #052e16; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-warning { background: var(--warning); color: #1c1917; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-sm { padding: 6px 10px; font-size: 0.8rem; width: auto; }
+    .row-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 600; }
+    .status-pill {
+      display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;
+    }
+    .unlocked { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+    .locked { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+    .utr-box {
+      display: inline-block; background: rgba(245, 158, 11, 0.15); color: var(--warning);
+      padding: 2px 7px; border-radius: 5px; font-family: monospace; font-size: 0.8rem;
+    }
+    #toast {
+      position: fixed; bottom: 18px; right: 18px; background: #1e293b; color: #fff;
+      border: 1px solid var(--border); padding: 10px 14px; border-radius: 8px;
+      font-size: 0.88rem; display: none; z-index: 999;
+    }
+    .table-wrap { overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>GymFlow Pro — Operator Panel</h1>
+        <span class="badge" id="syncStatus">Ready • Cloud Linked</span>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-outline btn-sm" onclick="fetchOwners()">↻ Refresh Cloud</button>
+        <button class="btn-primary btn-sm" onclick="syncAllToCloud()">↑ Push All</button>
+      </div>
+    </header>
+
+    <div class="card">
+      <h2>Cloud Backend URL (Apps Script)</h2>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <input type="text" id="scriptUrlInput" style="flex:1; min-width:240px;" />
+        <button class="btn-primary btn-sm" onclick="saveScriptUrl()">Save URL</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Add / Update Gym Client</h2>
+      <div class="grid">
+        <input type="text" id="loginId" placeholder="Login ID (e.g. ironhub)" />
+        <input type="text" id="password" placeholder="Password" />
+        <input type="text" id="gymName" placeholder="Gym Name" />
+        <input type="text" id="location" placeholder="City / Area" />
+        <input type="date" id="validTill" />
+        <select id="lockedState">
+          <option value="false">Unlocked (Active)</option>
+          <option value="true">Locked (Suspended)</option>
+        </select>
+      </div>
+      <div style="margin-top:12px; display:flex; gap:8px;">
+        <button class="btn-success" style="max-width:200px;" onclick="saveOwner()">Save & Sync Gym</button>
+        <button class="btn-outline" style="max-width:120px;" onclick="clearForm()">Clear</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Registered Gyms (<span id="gymCount">0</span>)</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Gym & Location</th>
+              <th>Login / Pass</th>
+              <th>Valid Till</th>
+              <th>Status</th>
+              <th>Pending UTR</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="ownersTableBody">
+            <tr><td colspan="6" style="color:var(--muted);">Loading gyms from cloud...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzicN4eJkVPoGEnTAiFh_zu4HHoSWPKWi-bJwV7_TXFJzppXQiDNWM4cGdILaJS18jS/exec";
+    const STORAGE_URL_KEY = "gymflow_operator_script_url";
+    const STORAGE_OWNERS_KEY = "gymflow_operator_owners";
+
+    let owners = JSON.parse(localStorage.getItem(STORAGE_OWNERS_KEY) || "[]");
+
+    function getScriptUrl() {
+      return localStorage.getItem(STORAGE_URL_KEY) || DEFAULT_SCRIPT_URL;
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.style.display = "block";
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => { t.style.display = "none"; }, 3000);
+    }
+
+    function setStatus(text) {
+      document.getElementById("syncStatus").textContent = text;
+    }
+
+    function saveScriptUrl() {
+      const val = document.getElementById("scriptUrlInput").value.trim();
+      if (!val) return showToast("Enter valid /exec URL");
+      localStorage.setItem(STORAGE_URL_KEY, val);
+      showToast("Backend URL saved");
+      fetchOwners();
+    }
+
+    async function apiCall(payload) {
+      const url = getScriptUrl();
+      setStatus("Syncing...");
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "Sync failed");
+      setStatus("Synced • " + new Date().toLocaleTimeString());
+      return data;
+    }
+
+    async function fetchOwners() {
+      try {
+        const data = await apiCall({ action: "get_owners" });
+        owners = data.owners || [];
+        localStorage.setItem(STORAGE_OWNERS_KEY, JSON.stringify(owners));
+        renderOwners();
+        showToast("Cloud list updated");
+      } catch (err) {
+        setStatus("Offline / Error");
+        renderOwners();
+        showToast("Error: " + err.message);
+      }
+    }
+
+    async function saveOwner() {
+      const loginId = document.getElementById("loginId").value.trim().toLowerCase();
+      const password = document.getElementById("password").value.trim();
+      const gymName = document.getElementById("gymName").value.trim();
+      const location = document.getElementById("location").value.trim();
+      const validTill = document.getElementById("validTill").value;
+      const locked = document.getElementById("lockedState").value === "true";
+
+      if (!loginId || !password || !gymName) {
+        return showToast("Login ID, Password aur Gym Name zaroori hai");
+      }
+
+      const existing = owners.find(o => o.loginId === loginId);
+      const account = {
+        loginId,
+        password,
+        gymName,
+        location,
+        validTill,
+        locked,
+        pendingUtr: existing ? existing.pendingUtr : ""
+      };
+
+      try {
+        const data = await apiCall({ action: "operator_save_owner", account });
+        owners = data.owners || [];
+        localStorage.setItem(STORAGE_OWNERS_KEY, JSON.stringify(owners));
+        renderOwners();
+        clearForm();
+        showToast("Saved & synced to Google Sheet");
+      } catch (err) {
+        showToast("Save failed: " + err.message);
+      }
+    }
+
+    async function toggleLock(loginId) {
+      const acc = owners.find(o => o.loginId === loginId);
+      if (!acc) return;
+      const updated = { ...acc, locked: !acc.locked };
+      try {
+        const data = await apiCall({ action: "operator_save_owner", account: updated });
+        owners = data.owners || [];
+        localStorage.setItem(STORAGE_OWNERS_KEY, JSON.stringify(owners));
+        renderOwners();
+        showToast(updated.locked ? "Gym Locked" : "Gym Unlocked");
+      } catch (err) {
+        showToast("Update failed: " + err.message);
+      }
+    }
+
+    async function approveUtrAndExtend(loginId) {
+      const acc = owners.find(o => o.loginId === loginId);
+      if (!acc) return;
+      const baseDate = acc.validTill && new Date(acc.validTill) > new Date()
+        ? new Date(acc.validTill)
+        : new Date();
+      baseDate.setDate(baseDate.getDate() + 30);
+      const nextValid = baseDate.toISOString().split("T")[0];
+
+      const updated = {
+        ...acc,
+        locked: false,
+        validTill: nextValid,
+        pendingUtr: ""
+      };
+
+      try {
+        const data = await apiCall({ action: "operator_save_owner", account: updated });
+        owners = data.owners || [];
+        localStorage.setItem(STORAGE_OWNERS_KEY, JSON.stringify(owners));
+        renderOwners();
+        showToast("UTR Approved • Unlocked till " + nextValid);
+      } catch (err) {
+        showToast("Approve failed: " + err.message);
+      }
+    }
+
+    async function syncAllToCloud() {
+      try {
+        const data = await apiCall({ action: "operator_sync_all_owners", accounts: owners });
+        owners = data.owners || [];
+        localStorage.setItem(STORAGE_OWNERS_KEY, JSON.stringify(owners));
+        renderOwners();
+        showToast("All accounts pushed to cloud");
+      } catch (err) {
+        showToast("Sync all failed: " + err.message);
+      }
+    }
+
+    function editOwner(loginId) {
+      const acc = owners.find(o => o.loginId === loginId);
+      if (!acc) return;
+      document.getElementById("loginId").value = acc.loginId;
+      document.getElementById("password").value = acc.password;
+      document.getElementById("gymName").value = acc.gymName;
+      document.getElementById("location").value = acc.location;
+      document.getElementById("validTill").value = acc.validTill;
+      document.getElementById("lockedState").value = acc.locked ? "true" : "false";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function clearForm() {
+      document.getElementById("loginId").value = "";
+      document.getElementById("password").value = "";
+      document.getElementById("gymName").value = "";
+      document.getElementById("location").value = "";
+      const d = new Date();
+      d.setDate(d.getDate() + 30);
+      document.getElementById("validTill").value = d.toISOString().split("T")[0];
+      document.getElementById("lockedState").value = "false";
+    }
+
+    function renderOwners() {
+      const tbody = document.getElementById("ownersTableBody");
+      document.getElementById("gymCount").textContent = owners.length;
+      if (!owners.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);">No gyms found. Add your first gym above.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = owners.map(o => `
+        <tr>
+          <td><strong>${escapeHtml(o.gymName)}</strong><br><span style="color:var(--muted);font-size:0.8rem;">${escapeHtml(o.location || "-")}</span></td>
+          <td><code>${escapeHtml(o.loginId)}</code><br><span style="color:var(--muted);font-size:0.8rem;">${escapeHtml(o.password)}</span></td>
+          <td>${escapeHtml(o.validTill || "-")}</td>
+          <td><span class="status-pill ${o.locked ? "locked" : "unlocked"}">${o.locked ? "LOCKED" : "ACTIVE"}</span></td>
+          <td>${o.pendingUtr ? `<span class="utr-box">${escapeHtml(o.pendingUtr)}</span>` : '<span style="color:var(--muted);">—</span>'}</td>
+          <td>
+            <div class="row-actions">
+              <button class="btn-outline btn-sm" onclick="editOwner('${o.loginId}')">Edit</button>
+              <button class="${o.locked ? "btn-success" : "btn-danger"} btn-sm" onclick="toggleLock('${o.loginId}')">${o.locked ? "Unlock" : "Lock"}</button>
+              ${o.pendingUtr ? `<button class="btn-warning btn-sm" onclick="approveUtrAndExtend('${o.loginId}')">Approve UTR (+30d)</button>` : ""}
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function escapeHtml(str) {
+      return String(str || "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+    }
+
+    document.getElementById("scriptUrlInput").value = getScriptUrl();
+    clearForm();
+    renderOwners();
+    fetchOwners();
+  </script>
+</body>
+</html>
