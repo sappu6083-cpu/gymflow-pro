@@ -1,338 +1,312 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GymFlow Pro — Operator Control Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>GymFlow Pro — Owner Login & Subscription Portal</title>
+  <meta name="theme-color" content="#09090b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="GymFlow Pro" />
+  <link id="manifestLink" rel="manifest" href="" />
+  <script>
+    (function() {
+      try {
+        const iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#10b981"/><path d="M144 216h32v80h-32zm192 0h32v80h-32zm-160 28h160v16H176zm-64-16h32v48h-32zm256 0h32v48h-32z" fill="#09090b"/></svg>';
+        const iconUrl = 'data:image/svg+xml;base64,' + btoa(iconSvg);
+        const manifest = {
+          name: "GymFlow Pro",
+          short_name: "GymFlow Pro",
+          start_url: location.href,
+          display: "standalone",
+          background_color: "#09090b",
+          theme_color: "#09090b",
+          icons: [
+            { src: iconUrl, sizes: "192x192", type: "image/svg+xml", purpose: "any maskable" },
+            { src: iconUrl, sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }
+          ]
+        };
+        const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+        document.getElementById('manifestLink').href = URL.createObjectURL(blob);
+      } catch (e) {}
+    })();
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] }
+        }
+      }
+    };
+  </script>
   <style>
-    :root {
-      --bg: #0b0f19;
-      --card: #131a2a;
-      --border: #232d45;
-      --text: #f1f5f9;
-      --muted: #94a3b8;
-      --primary: #3b82f6;
-      --success: #10b981;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-    }
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-    body { margin: 0; background: var(--bg); color: var(--text); padding: 16px; }
-    .container { max-width: 960px; margin: 0 auto; }
-    header {
-      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
-      gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 20px;
-    }
-    h1 { margin: 0; font-size: 1.35rem; }
-    .badge { font-size: 0.78rem; padding: 4px 10px; border-radius: 999px; background: #1e293b; color: var(--muted); }
-    .card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-      padding: 16px; margin-bottom: 18px;
-    }
-    .card h2 { margin: 0 0 12px; font-size: 1.05rem; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
-    input, select, button {
-      width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
-      background: #0f1624; color: var(--text); font-size: 0.92rem;
-    }
-    input:focus, select:focus { outline: none; border-color: var(--primary); }
-    button { cursor: pointer; font-weight: 600; border: none; transition: opacity 0.15s; }
-    button:hover { opacity: 0.9; }
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-success { background: var(--success); color: #052e16; }
-    .btn-danger { background: var(--danger); color: #fff; }
-    .btn-warning { background: var(--warning); color: #1c1917; }
-    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-    .btn-sm { padding: 6px 10px; font-size: 0.8rem; width: auto; }
-    .row-actions { display: flex; flex-wrap: wrap; gap: 6px; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); }
-    th { color: var(--muted); font-weight: 600; }
-    .status-pill {
-      display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;
-    }
-    .unlocked { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-    .locked { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
-    .utr-box {
-      display: inline-block; background: rgba(245, 158, 11, 0.15); color: var(--warning);
-      padding: 2px 7px; border-radius: 5px; font-family: monospace; font-size: 0.8rem;
-    }
-    #toast {
-      position: fixed; bottom: 18px; right: 18px; background: #1e293b; color: #fff;
-      border: 1px solid var(--border); padding: 10px 14px; border-radius: 8px;
-      font-size: 0.88rem; display: none; z-index: 999;
-    }
-    .table-wrap { overflow-x: auto; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #09090b; color: #f4f4f5; -webkit-tap-highlight-color: transparent; }
+    .glass-card { background: linear-gradient(145deg, rgba(24,24,27,0.95), rgba(16,16,20,0.98)); border: 1px solid rgba(255,255,255,0.08); }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 12px); }
   </style>
 </head>
-<body>
-  <div class="container">
-    <header>
-      <div>
-        <h1>GymFlow Pro — Operator Panel</h1>
-        <span class="badge" id="syncStatus">Ready • Cloud Linked</span>
-      </div>
-      <div style="display:flex; gap:8px;">
-        <button class="btn-outline btn-sm" onclick="fetchOwners()">↻ Refresh Cloud</button>
-        <button class="btn-primary btn-sm" onclick="syncAllToCloud()">↑ Push All</button>
-      </div>
-    </header>
+<body class="min-h-screen flex justify-center bg-zinc-950 text-zinc-100 select-none">
 
-    <div class="card">
-      <h2>Cloud Backend URL (Apps Script)</h2>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <input type="text" id="scriptUrlInput" style="flex:1; min-width:240px;" />
-        <button class="btn-primary btn-sm" onclick="saveScriptUrl()">Save URL</button>
+  <!-- ==================== 1. GYM OWNER LOGIN PORTAL ==================== -->
+  <div id="loginOverlay" class="fixed inset-0 z-50 hidden bg-zinc-950 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-[400px] glass-card rounded-3xl p-5 space-y-4 shadow-2xl border border-zinc-800 my-auto">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-zinc-950 shrink-0 shadow-lg">
+          <i data-lucide="dumbbell" class="w-5 h-5 stroke-[2.5]"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <h1 class="text-base font-extrabold text-white">GymFlow Pro</h1>
+            <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">PRO</span>
+          </div>
+          <p class="text-[11px] text-zinc-400">Gym Owner Login Portal</p>
+        </div>
       </div>
-    </div>
 
-    <div class="card">
-      <h2>Add / Update Gym Client</h2>
-      <div class="grid">
-        <input type="text" id="loginId" placeholder="Login ID (e.g. ironhub)" />
-        <input type="text" id="password" placeholder="Password" />
-        <input type="text" id="gymName" placeholder="Gym Name" />
-        <input type="text" id="location" placeholder="City / Area" />
-        <input type="date" id="validTill" />
-        <select id="lockedState">
-          <option value="false">Unlocked (Active)</option>
-          <option value="true">Locked (Suspended)</option>
-        </select>
-      </div>
-      <div style="margin-top:12px; display:flex; gap:8px;">
-        <button class="btn-success" style="max-width:200px;" onclick="saveOwner()">Save & Sync Gym</button>
-        <button class="btn-outline" style="max-width:120px;" onclick="clearForm()">Clear</button>
-      </div>
-    </div>
+      <form onsubmit="handleOwnerLogin(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-bold text-zinc-200 mb-1">Gym Login ID *</label>
+          <input type="text" id="loginUserInput" required value="owner" placeholder="Enter gym login id" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-sm text-white" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-zinc-200 mb-1">Password *</label>
+          <input type="password" id="loginPassInput" required value="gym2026" placeholder="Enter gym password" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-sm text-white" />
+        </div>
+        <p id="loginErrorText" class="text-xs text-rose-400 font-semibold hidden">Invalid Gym Login ID or Password.</p>
+        <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] transition text-zinc-950 font-extrabold text-sm py-3.5 rounded-xl">
+          Login to Gym Dashboard
+        </button>
+      </form>
 
-    <div class="card">
-      <h2>Registered Gyms (<span id="gymCount">0</span>)</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Gym & Location</th>
-              <th>Login / Pass</th>
-              <th>Valid Till</th>
-              <th>Status</th>
-              <th>Pending UTR</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="ownersTableBody">
-            <tr><td colspan="6" style="color:var(--muted);">Loading gyms from cloud...</td></tr>
-          </tbody>
-        </table>
+      <div class="grid grid-cols-2 gap-2.5">
+        <button type="button" onclick="triggerBiometricLogin()" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-emerald-400 font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="fingerprint" class="w-4 h-4"></i><span>Fingerprint Login</span>
+        </button>
+        <button type="button" onclick="linkBiometricCredential()" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="link" class="w-3.5 h-3.5"></i><span>Link Fingerprint</span>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between pt-1">
+        <span class="text-[10px] text-zinc-500">ID: owner • Pass: gym2026</span>
+        <button type="button" onclick="resetOwnerCredentialsDefault()" class="text-[10px] font-bold text-emerald-400 hover:underline">
+          Reset ID & Password
+        </button>
       </div>
     </div>
   </div>
 
-  <div id="toast"></div>
+  <!-- ==================== 1B. OWNER SUBSCRIPTION / TAP QR PAYMENT MODAL ==================== -->
+  <div id="ownerLockedPaymentModal" class="fixed inset-0 z-50 hidden bg-zinc-950/95 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-[410px] glass-card rounded-3xl p-5 space-y-4 shadow-2xl border border-emerald-500/30 my-auto">
+      <div class="flex items-start justify-between gap-2 border-b border-zinc-800 pb-3">
+        <div>
+          <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400">1-MONTH SUBSCRIPTION</span>
+          <h2 id="lockedGymTitle" class="text-base font-extrabold text-white mt-1">Tap QR to Pay & Locked UPI ID</h2>
+          <p id="lockedGymSubText" class="text-[11px] text-zinc-400">QR ya UPI par tap karke subscription payment karein</p>
+        </div>
+        <button type="button" onclick="closeOwnerLockedPaymentModal()" class="w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center shrink-0">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
 
-  <script>
-    const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzicN4eJkVPoGEnTAiFh_zu4HHoSWPKWi-bJwV7_TXFJzppXQiDNWM4cGdILaJS18jS/exec";
-    const STORAGE_URL_KEY = "gymflow_operator_script_url";
-    const STORAGE_OWNERS_KEY = "gymflow_operator_owners";
+      <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-3.5 flex items-center justify-between">
+        <div>
+          <div class="text-[10px] text-zinc-400">Subscription Plan</div>
+          <div class="text-sm font-extrabold text-white">1 Month Plan</div>
+          <div id="lockedValidTillText" class="text-[10px] text-amber-400 font-semibold mt-0.5">Valid Till: -</div>
+        </div>
+        <div class="text-right">
+          <div class="text-[10px] text-zinc-400">Monthly Fee</div>
+          <div id="lockedPlanAmount" class="text-xl font-extrabold text-emerald-400">₹499</div>
+        </div>
+      </div>
 
-    let owners = JSON.parse(localStorage.getItem(STORAGE_OWNERS_KEY) || "[]");
+      <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex flex-col items-center space-y-3">
+        <button type="button" onclick="triggerDirectUpiPayment()" title="Tap QR to Pay via UPI" class="group relative rounded-2xl bg-white p-2 border-2 border-transparent hover:border-emerald-400 active:scale-95 transition">
+          <img id="ownerPayQrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi%3A%2F%2Fpay%3Fpa%3Daftabshaikh79921-1%40okicici%26pn%3DAftab%2520Shaikh%26am%3D499%26cu%3DINR" alt="Scan UPI QR" class="w-36 h-36 rounded-xl" />
+          <span class="mt-1.5 block text-[10px] font-extrabold text-zinc-900 bg-emerald-400/90 rounded-lg py-1">Tap QR to Pay</span>
+        </button>
 
-    function getScriptUrl() {
-      return localStorage.getItem(STORAGE_URL_KEY) || DEFAULT_SCRIPT_URL;
-    }
+        <div class="w-full text-center space-y-1">
+          <div class="text-[10px] text-zinc-400 uppercase tracking-wider font-bold">Locked UPI ID</div>
+          <div class="flex items-center justify-between gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2">
+            <span class="text-xs font-mono font-bold text-emerald-400 select-all truncate">aftabshaikh79921-1@okicici</span>
+            <button type="button" onclick="copyFixedUpiId()" class="text-[10px] font-extrabold bg-emerald-500 text-zinc-950 hover:bg-emerald-400 px-2.5 py-1 rounded-lg shrink-0">Copy</button>
+          </div>
+        </div>
 
-    function showToast(msg) {
-      const t = document.getElementById("toast");
-      t.textContent = msg;
-      t.style.display = "block";
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => { t.style.display = "none"; }, 3000);
-    }
+        <button type="button" onclick="triggerDirectUpiPayment()" class="w-full bg-sky-500 hover:bg-sky-400 active:scale-[0.99] text-zinc-950 font-extrabold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5">
+          <i data-lucide="smartphone" class="w-3.5 h-3.5"></i><span>Pay via UPI App</span>
+        </button>
+      </div>
 
-    function setStatus(text) {
-      document.getElementById("syncStatus").textContent = text;
-    }
+      <div class="space-y-2.5">
+        <div>
+          <label class="block text-[11px] font-semibold text-zinc-300 mb-1">UPI UTR / Ref No. (Optional)</label>
+          <input type="text" id="ownerUtrSubmitInput" placeholder="e.g. 632849102411" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs text-white" />
+        </div>
+        <button type="button" onclick="submitOwnerPaymentRequest()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-xs py-3 rounded-xl">
+          Record Subscription Payment
+        </button>
+        <p id="ownerPendingMsg" class="text-[11px] text-emerald-400 font-semibold text-center hidden">
+          ✅ Subscription payment history mein save ho gayi hai.
+        </p>
+      </div>
+    </div>
+  </div>
 
-    function saveScriptUrl() {
-      const val = document.getElementById("scriptUrlInput").value.trim();
-      if (!val) return showToast("Enter valid /exec URL");
-      localStorage.setItem(STORAGE_URL_KEY, val);
-      showToast("Backend URL saved");
-      fetchOwners();
-    }
+  <!-- ==================== 2. OPERATOR MASTER CONTROL PANEL (LOCK / UNLOCK + ID / PASSWORD) ==================== -->
+  <div id="subManagerModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-[430px] bg-zinc-900 border border-amber-500/30 rounded-3xl p-5 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto my-auto">
+      <div class="flex items-start justify-between gap-2 border-b border-zinc-800 pb-3">
+        <div>
+          <span class="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-500/15 text-amber-400">OPERATOR ONLY PANEL</span>
+          <h2 class="text-base font-extrabold text-white mt-1">Lock/Unlock & Gym Owner IDs</h2>
+          <p class="text-[11px] text-zinc-400">Owner ko ID/Password dein aur payment aane par Unlock karein</p>
+        </div>
+        <button type="button" onclick="closeSubscriptionManagerModal()" class="w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center shrink-0">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
 
-    async function apiCall(payload) {
-      const url = getScriptUrl();
-      setStatus("Syncing...");
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (!data.ok) throw new Error(data.error || "Sync failed");
-      setStatus("Synced • " + new Date().toLocaleTimeString());
-      return data;
-    }
+      <form onsubmit="saveGymAccountCredential(event)" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-3.5 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-white">+ Create / Edit Gym Owner ID & Password</span>
+          <span class="text-[10px] font-bold bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded">1-Month Billing</span>
+        </div>
 
-    async function fetchOwners() {
-      try {
-        const data = await apiCall({ action: "get_owners" });
-        owners = data.owners || [];
-        localStorage.setItem(STORAGE_OWNERS_KEY, JSON.stringify(owners));
-        renderOwners();
-        showToast("Cloud list updated");
-      } catch (err) {
-        setStatus("Offline / Error");
-        renderOwners();
-        showToast("Error: " + err.message);
-      }
-    }
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-[10px] font-bold text-zinc-300 mb-1">Owner Login ID *</label>
+            <input type="text" id="newGymLoginId" required placeholder="e.g. fitfight" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-bold text-white" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-zinc-300 mb-1">Owner Password *</label>
+            <input type="text" id="newGymLoginPass" required placeholder="e.g. gym@2026" class="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-bold text-emerald-400" />
+          </div>
+        </div>
 
-    async function saveOwner() {
-      const loginId = document.getElementById("loginId").value.trim().toLowerCase();
-      const password = document.getElementById("password").value.trim();
-      const gymName = document.getElementById("gymName").value.trim();
-      const location = document.getElementById("location").value.trim();
-      const validTill = document.getElementById("validTill").value;
-      const locked = document.getElementById("lockedState").value === "true";
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-[10px] font-bold text-zinc-300 mb-1">Gym Name *</label>
+            <input type="text" id="newGymDisplayName" required placeholder="e.g. Fit Or Fight Gym" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-zinc-300 mb-1">Location</label>
+            <input type="text" id="newGymLocation" placeholder="e.g. Rander, Surat" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white" />
+          </div>
+        </div>
 
-      if (!loginId || !password || !gymName) {
-        return showToast("Login ID, Password aur Gym Name zaroori hai");
-      }
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-[10px] font-bold text-zinc-300 mb-1">Subscription Months</label>
+            <select id="newGymPlanMonths" onchange="recalcSubManagerPreview()" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-2.5 py-2 text-xs font-bold text-white">
+              <option value="1">1 Month</option>
+              <option value="2">2 Months</option>
+              <option value="3">3 Months</option>
+              <option value="6">6 Months</option>
+              <option value="12">12 Months</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-zinc-300 mb-1">Valid Till (Expiry)</label>
+            <input type="date" id="newGymValidTill" required class="w-full bg-zinc-900 border border-amber-500/40 rounded-xl px-2.5 py-2 text-xs font-bold text-amber-400" />
+          </div>
+        </div>
 
-      const existing = owners.find(o => o.loginId === loginId);
-      const account = {
-        loginId,
-        password,
-        gymName,
-        location,
-        validTill,
-        locked,
-        pendingUtr: existing ? existing.pendingUtr : ""
-      };
+        <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-xs py-3 rounded-xl transition">
+          Save Gym Owner ID & Password
+        </button>
+      </form>
 
-      try {
-        const data = await apiCall({ action: "operator_save_owner", account });
-        owners = data.owners || [];
-        localStorage.setItem(STORAGE_OWNERS_KEY, JSON.stringify(owners));
-        renderOwners();
-        clearForm();
-        showToast("Saved & synced to Google Sheet");
-      } catch (err) {
-        showToast("Save failed: " + err.message);
-      }
-    }
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">Gym Owners (Lock / Unlock Control)</span>
+          <button type="button" onclick="operatorResetGymLedgerToZero()" class="text-[10px] font-bold bg-zinc-800 hover:bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded">
+            Reset Gym Data to 0
+          </button>
+        </div>
+        <div id="registeredGymAccountsList" class="space-y-2.5 max-h-52 overflow-y-auto"></div>
+      </div>
 
-    async function toggleLock(loginId) {
-      const acc = owners.find(o => o.loginId === loginId);
-      if (!acc) return;
-      const updated = { ...acc, locked: !acc.locked };
-      try {
-        const data = await apiCall({ action: "operator_save_owner", account: updated });
-        owners = data.owners || [];
-        localStorage.setItem(STORAGE_OWNERS_KEY, JSON.stringify(owners));
-        renderOwners();
-        showToast(updated.locked ? "Gym Locked" : "Gym Unlocked");
-      } catch (err) {
-        showToast("Update failed: " + err.message);
-      }
-    }
+      <!-- Ek Kaam Mein Do Kaam: Google Sheet Cloud Lock/Unlock + Auto Backup URL -->
+      <div class="bg-zinc-950 border border-sky-500/30 rounded-2xl p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-white flex items-center gap-1.5">
+            <i data-lucide="cloud" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span>Cloud Lock/Unlock & Auto-Backup Sheet</span>
+          </span>
+          <button type="button" onclick="operatorFetchFromCloud()" class="text-[10px] font-extrabold bg-sky-500/20 text-sky-400 border border-sky-500/30 px-2 py-0.5 rounded-lg">
+            Refresh List
+          </button>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <input type="url" id="mgrCloudUrlInput" placeholder="Paste Google Apps Script Web App URL..." class="flex-1 bg-zinc-900 border border-zinc-800 focus:border-sky-400 rounded-xl px-2.5 py-1.5 text-[10px] text-white" />
+          <button type="button" onclick="saveOperatorCloudUrl()" class="bg-sky-500 hover:bg-sky-400 text-zinc-950 font-extrabold text-[10px] px-3 py-1.5 rounded-xl shrink-0">
+            Connect
+          </button>
+        </div>
+        <p id="mgrCloudStatusText" class="text-[10px] text-zinc-400">Status: Local Mode (Paste Web App URL for Live Remote Lock + Sheet Backup)</p>
+      </div>
 
-    async function approveUtrAndExtend(loginId) {
-      const acc = owners.find(o => o.loginId === loginId);
-      if (!acc) return;
-      const baseDate = acc.validTill && new Date(acc.validTill) > new Date()
-        ? new Date(acc.validTill)
-        : new Date();
-      baseDate.setDate(baseDate.getDate() + 30);
-      const nextValid = baseDate.toISOString().split("T")[0];
+      <!-- Tappable Fixed QR Code + Copyable Fixed UPI ID + Rate + Operator PIN -->
+      <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-3.5 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-white flex items-center gap-1">
+            <i data-lucide="lock" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>Tap QR to Pay & Locked UPI ID</span>
+          </span>
+          <span id="mgrSubAmountText" class="text-xs font-extrabold text-emerald-400">₹499 / mo</span>
+        </div>
 
-      const updated = {
-        ...acc,
-        locked: false,
-        validTill: nextValid,
-        pendingUtr: ""
-      };
-
-      try {
-        const data = await apiCall({ action: "operator_save_owner", account: updated });
-        owners = data.owners || [];
-        localStorage.setItem(STORAGE_OWNERS_KEY, JSON.stringify(owners));
-        renderOwners();
-        showToast("UTR Approved • Unlocked till " + nextValid);
-      } catch (err) {
-        showToast("Approve failed: " + err.message);
-      }
-    }
-
-    async function syncAllToCloud() {
-      try {
-        const data = await apiCall({ action: "operator_sync_all_owners", accounts: owners });
-        owners = data.owners || [];
-        localStorage.setItem(STORAGE_OWNERS_KEY, JSON.stringify(owners));
-        renderOwners();
-        showToast("All accounts pushed to cloud");
-      } catch (err) {
-        showToast("Sync all failed: " + err.message);
-      }
-    }
-
-    function editOwner(loginId) {
-      const acc = owners.find(o => o.loginId === loginId);
-      if (!acc) return;
-      document.getElementById("loginId").value = acc.loginId;
-      document.getElementById("password").value = acc.password;
-      document.getElementById("gymName").value = acc.gymName;
-      document.getElementById("location").value = acc.location;
-      document.getElementById("validTill").value = acc.validTill;
-      document.getElementById("lockedState").value = acc.locked ? "true" : "false";
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function clearForm() {
-      document.getElementById("loginId").value = "";
-      document.getElementById("password").value = "";
-      document.getElementById("gymName").value = "";
-      document.getElementById("location").value = "";
-      const d = new Date();
-      d.setDate(d.getDate() + 30);
-      document.getElementById("validTill").value = d.toISOString().split("T")[0];
-      document.getElementById("lockedState").value = "false";
-    }
-
-    function renderOwners() {
-      const tbody = document.getElementById("ownersTableBody");
-      document.getElementById("gymCount").textContent = owners.length;
-      if (!owners.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);">No gyms found. Add your first gym above.</td></tr>';
-        return;
-      }
-      tbody.innerHTML = owners.map(o => `
-        <tr>
-          <td><strong>${escapeHtml(o.gymName)}</strong><br><span style="color:var(--muted);font-size:0.8rem;">${escapeHtml(o.location || "-")}</span></td>
-          <td><code>${escapeHtml(o.loginId)}</code><br><span style="color:var(--muted);font-size:0.8rem;">${escapeHtml(o.password)}</span></td>
-          <td>${escapeHtml(o.validTill || "-")}</td>
-          <td><span class="status-pill ${o.locked ? "locked" : "unlocked"}">${o.locked ? "LOCKED" : "ACTIVE"}</span></td>
-          <td>${o.pendingUtr ? `<span class="utr-box">${escapeHtml(o.pendingUtr)}</span>` : '<span style="color:var(--muted);">—</span>'}</td>
-          <td>
-            <div class="row-actions">
-              <button class="btn-outline btn-sm" onclick="editOwner('${o.loginId}')">Edit</button>
-              <button class="${o.locked ? "btn-success" : "btn-danger"} btn-sm" onclick="toggleLock('${o.loginId}')">${o.locked ? "Unlock" : "Lock"}</button>
-              ${o.pendingUtr ? `<button class="btn-warning btn-sm" onclick="approveUtrAndExtend('${o.loginId}')">Approve UTR (+30d)</button>` : ""}
+        <div class="flex items-center gap-3">
+          <button type="button" onclick="triggerDirectUpiPayment()" title="Tap QR to Pay" class="rounded-xl bg-white p-1.5 border-2 border-transparent hover:border-emerald-400 active:scale-95 transition shrink-0 text-center">
+            <img id="mgrQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=upi%3A%2F%2Fpay%3Fpa%3Daftabshaikh79921-1%40okicici%26pn%3DAftab%2520Shaikh%26am%3D499%26cu%3DINR" alt="Fixed UPI QR" class="w-20 h-20 rounded-lg" />
+            <span class="mt-1 block text-[9px] font-extrabold text-zinc-900 bg-emerald-400 rounded py-0.5">Tap QR</span>
+          </button>
+          <div class="flex-1 space-y-2 min-w-0">
+            <div>
+              <label class="block text-[10px] text-zinc-400 mb-0.5">Fixed UPI ID (Locked)</label>
+              <div class="flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 rounded-xl px-2.5 py-1.5">
+                <input type="text" id="mgrUpiIdInput" value="aftabshaikh79921-1@okicici" readonly onclick="copyFixedUpiId()" class="w-full bg-transparent text-[10px] font-mono font-bold text-emerald-400 focus:outline-none select-all truncate cursor-pointer" />
+                <button type="button" onclick="copyFixedUpiId()" class="text-[10px] font-extrabold bg-emerald-500 text-zinc-950 hover:bg-emerald-400 px-2 py-0.5 rounded shrink-0">Copy</button>
+              </div>
             </div>
-          </td>
-        </tr>
-      `).join("");
-    }
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-0.5">1-Month Fee (₹)</label>
+                <input type="number" id="mgrUpiAmountInput" oninput="refreshMgrQrPreview()" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-2 py-1 text-xs font-bold text-white" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-amber-400 mb-0.5">Operator PIN</label>
+                <input type="text" id="mgrOperatorPinInput" class="w-full bg-zinc-900 border border-amber-500/40 rounded-xl px-2 py-1 text-xs font-bold text-amber-400" />
+              </div>
+            </div>
+          </div>
+        </div>
 
-    function escapeHtml(str) {
-      return String(str || "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
-    }
+        <button type="button" onclick="saveMgrUpiSettings()" class="w-full bg-zinc-800 hover:bg-sky-500 hover:text-zinc-950 text-sky-400 font-bold text-xs py-2.5 rounded-xl transition">
+          Save Rate & Operator PIN
+        </button>
+      </div>
+    </div>
+  </div>
 
-    document.getElementById("scriptUrlInput").value = getScriptUrl();
-    clearForm();
-    renderOwners();
-    fetchOwners();
-  </script>
-</body>
-</html>
+
+  <!-- ==================== 3. MAIN GYM APP SHELL ==================== -->
+  <div id="mainAppShell" class="w-full max-w-[480px] min-h-screen bg-zinc-950 border-x border-zinc-900 flex flex-col relative shadow-2xl hidden">
+    
+    <header class="sticky top-0 z-30 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-900 px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-zinc-950 font-extrabold shrink-0">
+          <i data-lucide="dumbbell" class="w-4 h-4 stroke-[2.5]"></i>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5">
+            <spa
